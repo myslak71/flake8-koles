@@ -1,0 +1,15 @@
+---
+language: python
+sudo: required
+dist: xenial
+python: "3.7"
+cache: pip
+install:
+  - pip install -r requirements-dev.txt
+script:
+  - make flake8
+  - make mypy
+  - make yamllint
+  - pip install .
+  - make unittests
+after_success: coveralls
