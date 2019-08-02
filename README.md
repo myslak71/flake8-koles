@@ -28,14 +28,14 @@ flake8 --ignore-shorties 4 --censor-msg --lang=english,polish
 |`--lang`|english |use bad words from the selected languages|
 
 ## Development notes
-`make lint` - runs all linters
+`make lint` - run all linters
 
-`make flake8` - runs flake8
+`make flake8` - run flake8
 
 `make coverage_html` - generate and open html coverage report in the default browser
 
-`make unittests` - runs unittests with coverage report
+`make unittests` - run unittests with coverage report
 
-`make mypy` - runs mypy
+`make mypy` - run mypy
 
-`make yamllint` - runs yamllint
+`make yamllint` - run yamllint
