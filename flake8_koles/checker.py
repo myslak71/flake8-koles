@@ -2,7 +2,6 @@
 import ast
 import optparse
 import os
-import re
 from typing import Generator, List, Tuple, Set
 
 import pkg_resources
@@ -11,6 +10,7 @@ from flake8.utils import stdin_get_value
 from pycodestyle import readlines
 
 from flake8_koles import __version__
+from flake8_koles.overlap_words import get_overlapped_words
 
 
 class KolesChecker:
@@ -24,15 +24,6 @@ class KolesChecker:
         """Initialize class values. Parameter `tree` is required by flake8."""
         self.filename = filename
         self._pattern = '|'.join(self._get_bad_words())
-
-    def _check_row(self, string: str) -> List[Tuple[int, str]]:
-        """Return a list containing bad words and their positions."""
-        if self._pattern == '':
-            return []
-
-        regex = re.compile(f'(?=({self._pattern}))', flags=re.IGNORECASE)
-
-        return [(match.start(), match.group(1)) for match in regex.finditer(string)]
 
     def _get_bad_words(self) -> Set[str]:
         """Get a set of bad words."""
@@ -70,7 +61,9 @@ class KolesChecker:
 
     def _get_filename_errors(self) -> Generator[Tuple[int, int, str, type], None, None]:
         """Get filename errors if exist."""
-        filename_errors = self._check_row(os.path.basename(self.filename))
+        filename_errors = get_overlapped_words(
+            os.path.basename(self.filename), self._pattern
+        )
         if filename_errors:
             for column, word in filename_errors:
                 yield (
@@ -91,7 +84,7 @@ class KolesChecker:
     ) -> Generator[Tuple[int, int, str, type], None, None]:
         """Get file content errors if exist."""
         for row_number, row in enumerate(content, 1):
-            errors = self._check_row(row)
+            errors = get_overlapped_words(row, self._pattern)
             for column, word in errors:
                 yield (
                     row_number,

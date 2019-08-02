@@ -6,6 +6,7 @@ import pytest
 from flake8.options.manager import OptionManager, Option
 
 from flake8_koles.checker import KolesChecker
+from flake8_koles.overlap_words import get_overlapped_words
 
 
 @pytest.mark.parametrize(
@@ -93,15 +94,13 @@ def test_get_swear_data(
             ('abcd|ab|abc|cd', 'ABCDAB', [(0, 'ABCD'), (2, 'CD'), (4, 'AB')]),
     ),
 )
-def test_check_row(
+def test_get_overlapped_words(
         pattern,
         string,
         expected_result,
-        koles_checker
 ):
     """Test that check_string returns appropriate value for given pattern and string."""
-    koles_checker._pattern = pattern
-    result = koles_checker._check_row(string)
+    result = get_overlapped_words(string, pattern)
 
     assert [*result] == expected_result
 
@@ -198,7 +197,7 @@ def test_get_file_content_regular_filename(
 
     ),
 )
-@mock.patch('flake8_koles.checker.KolesChecker._check_row')
+@mock.patch('flake8_koles.checker.get_overlapped_words')
 @mock.patch('flake8_koles.checker.KolesChecker._censor_word')
 def test_get_filename_errors(
         mock_censor_word,
@@ -213,6 +212,7 @@ def test_get_filename_errors(
     mock_check_row.return_value = check_row_value
     mock_censor_word.side_effect = censor_word_value
     koles_checker.filename = filename
+    koles_checker._pattern = 'test pattern'
     result = [*koles_checker._get_filename_errors()]
 
     assert result == expected_result
@@ -242,7 +242,7 @@ def test_get_filename_errors(
 
     ),
 )
-@mock.patch('flake8_koles.checker.KolesChecker._check_row')
+@mock.patch('flake8_koles.checker.get_overlapped_words')
 @mock.patch('flake8_koles.checker.KolesChecker._censor_word')
 def test_get_content_errors(
         mock_censor_word,
@@ -256,6 +256,7 @@ def test_get_content_errors(
     """Test that appropriate error messages are returned."""
     mock_check_row.side_effect = check_row_value
     mock_censor_word.side_effect = censor_word_value
+    koles_checker._pattern = 'test_pattern'
     result = [*koles_checker._get_content_errors(content)]
 
     assert result == expected_result

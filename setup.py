@@ -3,6 +3,8 @@ import os
 
 from setuptools import setup
 
+from Cython.Build import cythonize
+
 DIR_PATH = os.path.abspath(os.path.dirname(__file__))
 
 install_requires = ['flake8>=1.5', 'six', 'pycodestyle']
@@ -45,4 +47,5 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.7',
     ],
+    ext_modules=cythonize("flake8_koles/overlap_words.pyx")
 )
