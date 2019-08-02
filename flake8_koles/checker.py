@@ -1,11 +1,12 @@
 """Koles checker module."""
+import ast
+import optparse
 import os
 import re
-import optparse
-from typing import Generator, List, Tuple
+from typing import Generator, List, Tuple, Set
+
 import pkg_resources
 from flake8.options.manager import OptionManager
-
 from flake8.utils import stdin_get_value
 from pycodestyle import readlines
 
@@ -15,37 +16,48 @@ from flake8_koles import __version__
 class KolesChecker:
     """Bad language checker class."""
 
-    name = "flake8-koles"
+    name = 'flake8-koles'
     version = __version__
-    swear_list_file = "/data/swear_list/english.dat"
+    swear_list_dir = '/data/swear_list/'
 
-    def __init__(self, tree, filename):
-        """Initialize class values."""
+    def __init__(self, tree: ast.Module, filename: str) -> None:
+        """Initialize class values. Parameter `tree` is required by flake8."""
         self.filename = filename
-        self.tree = tree
-        self._pattern = "|".join(self._get_bad_words())
+        self._pattern = '|'.join(self._get_bad_words())
 
     def _check_row(self, string: str) -> List[Tuple[int, str]]:
         """Return a list containing bad words and their positions."""
-        if self._pattern == "":
+        if self._pattern == '':
             return []
 
-        regex = re.compile(f"(?=({self._pattern}))", flags=re.IGNORECASE)
+        regex = re.compile(f'(?=({self._pattern}))', flags=re.IGNORECASE)
 
         return [(match.start(), match.group(1)) for match in regex.finditer(string)]
 
-    def _get_bad_words(self) -> Generator[str, None, None]:
-        """Get a generator of bad words."""
-        data = pkg_resources.resource_string(__name__, self.swear_list_file)
-        return (
+    def _get_bad_words(self) -> Set[str]:
+        """Get a set of bad words."""
+        data = self._get_swears_data()
+
+        return {
             word
-            for word in data.decode().strip().split("\n")
+            for word in data.decode().strip().split('\n')
             if len(word) > self.options.ignore_shorties  # type: ignore
-        )
+        }
+
+    def _get_swears_data(self) -> bytes:
+        """Get swears data from languages present in the options."""
+        data = b''
+        for lang in self.options.lang:  # type: ignore
+            file_path = f'{self.swear_list_dir}{lang}.dat'
+            data += pkg_resources.resource_string(
+                __name__, file_path
+            )
+
+        return data
 
     def _get_file_content(self) -> List[str]:
         """Return file content as a list of lines."""
-        if self.filename in ("stdin", "-", None):
+        if self.filename in ('stdin', '-', None):
             return stdin_get_value().splitlines(True)
         else:
             return readlines(self.filename)
@@ -64,7 +76,7 @@ class KolesChecker:
                 yield (
                     0,
                     column,
-                    f"KOL002 Filename contains bad language: {self._censor_word(word)}",
+                    f'KOL002 Filename contains bad language: {self._censor_word(word)}',
                     KolesChecker,
                 )
 
@@ -84,7 +96,7 @@ class KolesChecker:
                 yield (
                     row_number,
                     column,
-                    f"KOL001 Bad language found: {self._censor_word(word)}",
+                    f'KOL001 Bad language found: {self._censor_word(word)}',
                     KolesChecker,
                 )
 
@@ -92,10 +104,22 @@ class KolesChecker:
     def add_options(cls, parser: OptionManager) -> None:
         """Add koles linter options to the flake8 parser."""
         parser.add_option(
-            "--ignore-shorties", default=0, type="int", parse_from_config=True
+            '--ignore-shorties',
+            default=0,
+            type='int',
+            parse_from_config=True
         )
         parser.add_option(
-            "--censor-msg", default=0, parse_from_config=True, action='store_true'
+            '--censor-msg',
+            default=0,
+            parse_from_config=True,
+            action='store_true'
+        )
+        parser.add_option(
+            '--lang',
+            default='english',
+            parse_from_config=True,
+            comma_separated_list=True
         )
 
     @classmethod

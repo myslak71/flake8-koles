@@ -8,7 +8,7 @@
 Watch your language young pal!
 
 Flake8 extension for checking bad language occurrences. Lists all swears found in the code and their location.
-For now only english language is supported.
+For now only english and polish languages are supported.
 
 ## Installation
 flake8 is required for the installation.
@@ -18,18 +18,23 @@ pip install flake8-koles
 
 ## Usage
 ```
-flake8 --ignore-shorties 4 --censor-msg
+flake8 --ignore-shorties 4 --censor-msg --lang=english,polish
 ```
-`--ignore-shorties <number>` - ignores bad words shorter or equal to `<number>`
-
-`--censor-msg` - replaces bad words not leading letters with `*` in error messages
+##### Options
+|OPTION    | DEFAULT|DESCRIPTION |
+| --------  |---|-------------|
+|`--ignore-shorties`|0 |ignore bad words shorter or equal to the argument|
+|`--censor-msg`|False |replace bad words not leading letters with `*` in error messages|
+|`--lang`|english |use bad words from the selected languages|
 
 ## Development notes
 `make lint` - runs all linters
 
 `make flake8` - runs flake8
 
-`make unittests` - runs unittests with coverage report and -s flag
+`make coverage_html` - generate and open html coverage report in the default browser
+
+`make unittests` - runs unittests with coverage report
 
 `make mypy` - runs mypy
 

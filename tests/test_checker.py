@@ -9,26 +9,69 @@ from flake8_koles.checker import KolesChecker
 
 
 @pytest.mark.parametrize(
-    "ignore_shorties, expected_result",
+    "ignore_shorties, expected_result, get_swears_data_value",
     (
-            (0, ['Mike D', 'MCA', 'Ad-Rock']),
-            (1, ['Mike D', 'MCA', 'Ad-Rock']),
-            (3, ['Mike D', 'Ad-Rock']),
-            (6, ['Ad-Rock', ]),
-            (69, []),
+            (0, {'Mike D', 'MCA', 'Ad-Rock'}, b'Mike D\nMCA\nAd-Rock\n'),
+            (1, {'Mike D', 'MCA', 'Ad-Rock'}, b'Mike D\nMCA\nAd-Rock\n'),
+            (3, {'Mike D', 'Ad-Rock'}, b'Mike D\nMCA\nAd-Rock\n'),
+            (6, {'Ad-Rock', }, b'Mike D\nMCA\nAd-Rock\n'),
+            (69, set(), b'Mike D\nMCA\nAd-Rock\n'),
+            # Case: repeated swears, distinct ones returned
+            (0, {'Mike D', 'MCA', 'Ad-Rock'}, b'Mike D\nMCA\nAd-Rock\nMike D\nMCA\n'),
+    ),
+)
+@mock.patch('flake8_koles.checker.KolesChecker._get_swears_data')
+def test_get_bad_words(
+        mock_get_swears_data,
+        ignore_shorties,
+        expected_result,
+        get_swears_data_value,
+        koles_checker
+):
+    """
+    Test _get_bad_words.
+
+    Test that the function returns proper set of bad words
+    depending on the ignore-shorties option.
+    """
+    mock_get_swears_data.return_value = get_swears_data_value
+    koles_checker.options = Mock(ignore_shorties=ignore_shorties)
+    result = koles_checker._get_bad_words()
+
+    assert result == expected_result
+
+
+@pytest.mark.parametrize(
+    "lang, resource_string_value, expected_result",
+    (
+            # Case 1: One language
+            (
+                    ['beastie_boys_lang'],
+                    [b'Mike D\nMCA\nAd-Rock\n'],
+                    b'Mike D\nMCA\nAd-Rock\n'
+            ),
+            # Case 2: Two languages
+            (
+                    ['beastie_boys_lang', 'snoop_dogg_lang'],
+                    [b'Mike D\nMCA\nAd-Rock\n', b'Snoop Dogg\nDr. Dre\n'],
+                    b'Mike D\nMCA\nAd-Rock\nSnoop Dogg\nDr. Dre\n'
+            ),
     ),
 )
 @mock.patch('flake8_koles.checker.pkg_resources.resource_string')
-def test_get_bad_words(
+def test_get_swear_data(
         mock_resource_string,
-        ignore_shorties,
+        lang,
+        resource_string_value,
         expected_result,
         koles_checker
 ):
-    """Test that the function returns proper set of bad words depending on ignore-shorties option."""
-    mock_resource_string.return_value = b'Mike D\nMCA\nAd-Rock\n'
-    koles_checker.options = Mock(ignore_shorties=ignore_shorties)
-    result = [*koles_checker._get_bad_words()]
+    """
+    Test that _get_swear_data merges swears from languages given in the options.
+    """
+    mock_resource_string.side_effect = resource_string_value
+    koles_checker.options = Mock(lang=lang)
+    result = koles_checker._get_swears_data()
 
     assert result == expected_result
 
@@ -80,7 +123,11 @@ def test_censor_word(
         expected_result,
         koles_checker
 ):
-    """Test that the function returns proper set of bad words depending on ignore-shorties option."""
+    """Test censor_word.
+
+    Test that the function returns proper set of bad words
+    depending on ignore-shorties option.
+    """
     koles_checker.options = Mock(censor_msg=censor_msg)
     result = koles_checker._censor_word(word)
 
@@ -136,8 +183,16 @@ def test_get_file_content_regular_filename(
                     [(0, 'bad'), (4, 'ugly')],
                     ['bad', 'ugly'],
                     [
-                        (0, 0, 'KOL002 Filename contains bad language: bad', KolesChecker),
-                        (0, 4, 'KOL002 Filename contains bad language: ugly', KolesChecker)
+                        (
+                                0, 0,
+                                'KOL002 Filename contains bad language: bad',
+                                KolesChecker
+                        ),
+                        (
+                                0, 4,
+                                'KOL002 Filename contains bad language: ugly',
+                                KolesChecker
+                        )
                     ]
             )
 
@@ -229,14 +284,28 @@ def test_add_options(koles_checker):
     option_manager = OptionManager()
     koles_checker.add_options(option_manager)
 
-    assert repr(option_manager.options) == repr([
-        Option(
-            long_option_name="--ignore-shorties", default=0, type="int", parse_from_config=True
-        ),
-        Option(
-            long_option_name="--censor-msg", default=0, parse_from_config=True, action='store_true'
-        )
-    ])
+    assert repr(option_manager.options) == repr(
+        [
+            Option(
+                long_option_name='--ignore-shorties',
+                default=0,
+                type='int',
+                parse_from_config=True
+            ),
+            Option(
+                long_option_name='--censor-msg',
+                default=0,
+                parse_from_config=True,
+                action='store_true'
+            ),
+            Option(
+                long_option_name='--lang',
+                default='english',
+                parse_from_config=True,
+                comma_separated_list=True
+            )
+        ]
+    )
 
 
 def test_parse_options(koles_checker):
