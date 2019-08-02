@@ -3,6 +3,7 @@ from unittest import mock
 from unittest.mock import Mock
 
 import pytest
+from flake8.options.manager import OptionManager, Option
 
 from flake8_koles.checker import KolesChecker
 
@@ -221,3 +222,26 @@ def test_run(
         (1, 5, 'KOL001 Bad language found: v***', KolesChecker),
         (3, 4, 'KOL001 Bad language found: b**', KolesChecker),
         (3, 8, 'KOL001 Bad language found: w****', KolesChecker)]
+
+
+def test_add_options(koles_checker):
+    """Test that all options are added to the parser."""
+    option_manager = OptionManager()
+    koles_checker.add_options(option_manager)
+
+    assert repr(option_manager.options) == repr([
+        Option(
+            long_option_name="--ignore-shorties", default=0, type="int", parse_from_config=True
+        ),
+        Option(
+            long_option_name="--censor-msg", default=0, parse_from_config=True, action='store_true'
+        )
+    ])
+
+
+def test_parse_options(koles_checker):
+    """Test that options are correctly assigned to the class."""
+    test_options = {'kick_it': True}
+    koles_checker.parse_options(test_options)
+
+    assert koles_checker.options == test_options
