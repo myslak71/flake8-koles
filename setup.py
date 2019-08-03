@@ -8,10 +8,6 @@ DIR_PATH = os.path.abspath(os.path.dirname(__file__))
 
 install_requires = ['flake8>=3.3.0']
 
-with open(os.path.join(DIR_PATH, 'requirements-dev.txt'), encoding='utf-8') as file:
-    requirements_dev = [str(req) for req in parse_requirements(file.read())]
-extras_require = {'dev': requirements_dev}
-
 with open(os.path.join(DIR_PATH, 'README.md'), encoding='utf-8') as file:
     long_description = file.read()
 
@@ -42,7 +38,6 @@ setup(
             'KOL = flake8_koles.checker:KolesChecker',
         ]
     },
-    extras_require=extras_require,
 
     classifiers=[
         'Development Status :: 3 - Alpha',
