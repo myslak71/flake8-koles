@@ -6,7 +6,7 @@ from setuptools import setup
 
 DIR_PATH = os.path.abspath(os.path.dirname(__file__))
 
-install_requires = ['flake8>=1.5']
+install_requires = ['flake8>=3.3.0']
 
 with open(os.path.join(DIR_PATH, 'requirements-dev.txt'), encoding='utf-8') as file:
     requirements_dev = [str(req) for req in parse_requirements(file.read())]

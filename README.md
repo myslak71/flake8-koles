@@ -11,7 +11,7 @@ Flake8 extension for checking bad language occurrences. Lists all swears found i
 For now only english and polish languages are supported.
 
 ## Installation
-flake8 is required for the installation.
+flake8>=3.3.0 is required for the installation.
 ```
 pip install flake8-koles
 ```
@@ -37,5 +37,6 @@ flake8 --ignore-shorties 4 --censor-msg --lang=english,polish
 |`make flake8`|run flake8|
 |`make mypy`|run mypy|
 |`make lint`|run all linters|
+|`make safety`|run safety check|
 |`make unittests`|run unittests with coverage report
 |`make yamllint`|run yamllint|
