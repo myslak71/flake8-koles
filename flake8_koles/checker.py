@@ -18,7 +18,7 @@ class KolesChecker:
 
     name = 'flake8-koles'
     options = optparse.Values()
-    SWEAR_DATA_DIR = '/data/swear_list'
+    SWEAR_DATA_DIR = 'data/swear_list'
     version = __version__
 
     def __init__(self, tree: ast.Module, filename: str) -> None:
@@ -47,29 +47,20 @@ class KolesChecker:
             parse_from_config=True,
             action='store_true'
         )
+
+        lang_choices = cls._get_lang_choices()
         parser.add_option(
             '--lang',
             default='english',
             parse_from_config=True,
-            comma_separated_list=True
+            comma_separated_list=True,
+            choices=lang_choices
         )
 
     @classmethod
     def parse_options(cls, options: optparse.Values) -> None:
         """Get parser options from flake8."""
         cls.options = options
-
-    def _check_row(self, string: str) -> List[Tuple[int, str]]:
-        """Return a list containing bad words and their positions."""
-        if self._pattern == '':
-            return []
-
-        regex = re.compile(f'(?=({self._pattern}))', flags=re.IGNORECASE)
-
-        return [
-            (match.start(), match.group(1))
-            for match in regex.finditer(string)
-        ]
 
     def _get_bad_words(self) -> Set[str]:
         """Get a set of bad words."""
@@ -98,12 +89,6 @@ class KolesChecker:
             return stdin_get_value().splitlines(True)
         else:
             return readlines(self.filename)
-
-    def _censor_word(self, word: str) -> str:
-        """Replace all letters but first with `*` if censor_msg option is True."""
-        if self.options.censor_msg:
-            return word[0] + '*' * (len(word) - 1)
-        return word
 
     def _get_filename_errors(self) -> Generator[Tuple[int, int, str, type], None, None]:
         """Get filename errors if exist."""
@@ -134,3 +119,30 @@ class KolesChecker:
                 )
                 for column, word in errors
             )
+
+    def _check_row(self, string: str) -> List[Tuple[int, str]]:
+        """Return a list containing bad words and their positions."""
+        if self._pattern == '':
+            return []
+
+        regex = re.compile(f'(?=({self._pattern}))', flags=re.IGNORECASE)
+
+        return [
+            (match.start(), match.group(1))
+            for match in regex.finditer(string)
+        ]
+
+    def _censor_word(self, word: str) -> str:
+        """Replace all letters but first with `*` if censor_msg option is True."""
+        if self.options.censor_msg:
+            return word[0] + '*' * (len(word) - 1)
+        return word
+
+    @classmethod
+    def _get_lang_choices(cls) -> List[str]:
+        """Get language choices by removing .dat from language filenames."""
+        return [
+            lang_file.replace('.dat', '')
+            for lang_file in
+            pkg_resources.resource_listdir(__name__, cls.SWEAR_DATA_DIR)
+        ]
