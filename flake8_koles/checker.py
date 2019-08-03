@@ -26,6 +26,39 @@ class KolesChecker:
         self.filename = filename
         self._pattern = '|'.join(self._get_bad_words())
 
+    def run(self) -> Generator[Tuple[int, int, str, type], None, None]:
+        """Run the linter and return a generator of errors."""
+        content = self._get_file_content()
+        yield from self._get_filename_errors()
+        yield from self._get_content_errors(content)
+
+    @classmethod
+    def add_options(cls, parser: OptionManager) -> None:
+        """Add koles linter options to the flake8 parser."""
+        parser.add_option(
+            '--ignore-shorties',
+            default=0,
+            type='int',
+            parse_from_config=True
+        )
+        parser.add_option(
+            '--censor-msg',
+            default=0,
+            parse_from_config=True,
+            action='store_true'
+        )
+        parser.add_option(
+            '--lang',
+            default='english',
+            parse_from_config=True,
+            comma_separated_list=True
+        )
+
+    @classmethod
+    def parse_options(cls, options: optparse.Values) -> None:
+        """Get parser options from flake8."""
+        cls.options = options
+
     def _check_row(self, string: str) -> List[Tuple[int, str]]:
         """Return a list containing bad words and their positions."""
         if self._pattern == '':
@@ -86,12 +119,6 @@ class KolesChecker:
             for column, word in filename_errors
         )
 
-    def run(self) -> Generator[Tuple[int, int, str, type], None, None]:
-        """Run the linter and return a generator of errors."""
-        content = self._get_file_content()
-        yield from self._get_filename_errors()
-        yield from self._get_content_errors(content)
-
     def _get_content_errors(
             self, content
     ) -> Generator[Tuple[int, int, str, type], None, None]:
@@ -107,30 +134,3 @@ class KolesChecker:
                 )
                 for column, word in errors
             )
-
-    @classmethod
-    def add_options(cls, parser: OptionManager) -> None:
-        """Add koles linter options to the flake8 parser."""
-        parser.add_option(
-            '--ignore-shorties',
-            default=0,
-            type='int',
-            parse_from_config=True
-        )
-        parser.add_option(
-            '--censor-msg',
-            default=0,
-            parse_from_config=True,
-            action='store_true'
-        )
-        parser.add_option(
-            '--lang',
-            default='english',
-            parse_from_config=True,
-            comma_separated_list=True
-        )
-
-    @classmethod
-    def parse_options(cls, options: optparse.Values) -> None:
-        """Get parser options from flake8."""
-        cls.options = options
