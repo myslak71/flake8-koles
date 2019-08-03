@@ -17,8 +17,9 @@ class KolesChecker:
     """Bad language checker class."""
 
     name = 'flake8-koles'
+    options = None
+    swear_list_dir = '/data/swear_list'
     version = __version__
-    swear_list_dir = '/data/swear_list/'
 
     def __init__(self, tree: ast.Module, filename: str) -> None:
         """Initialize class values. Parameter `tree` is required by flake8."""
@@ -51,7 +52,7 @@ class KolesChecker:
         """Get swears data from languages present in the options."""
         data = b''
         for lang in self.options.lang:  # type: ignore
-            file_path = f'{self.swear_list_dir}{lang}.dat'
+            file_path = f'{self.swear_list_dir}/{lang}.dat'
             data += pkg_resources.resource_string(
                 __name__, file_path
             )
@@ -75,10 +76,7 @@ class KolesChecker:
         """Get filename errors if exist."""
         filename_errors = self._check_row(os.path.basename(self.filename))
 
-        if not filename_errors:
-            return
-
-        yield from (
+        return (
             (
                 0,
                 column,
@@ -97,7 +95,7 @@ class KolesChecker:
     def _get_content_errors(
             self, content
     ) -> Generator[Tuple[int, int, str, type], None, None]:
-        """Get file content errors if exist."""
+        """Get file content errors if any exist."""
         for row_number, row in enumerate(content, 1):
             errors = self._check_row(row)
             yield from (
@@ -135,4 +133,4 @@ class KolesChecker:
     @classmethod
     def parse_options(cls, options: optparse.Values) -> None:
         """Get parser options from flake8."""
-        cls.options = options  # type: ignore
+        cls.options = options
