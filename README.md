@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/myslak71/flake8-koles.svg?branch=master)](https://travis-ci.org/myslak71/flake8-koles)
 [![Coverage Status](https://coveralls.io/repos/github/myslak71/flake8-koles/badge.svg?branch=master)](https://coveralls.io/github/myslak71/flake8-koles?branch=master)
 ![image](https://img.shields.io/badge/python-3.7-blue.svg)
-![image](https://img.shields.io/badge/version-0.1.0-yellow)
+![image](https://img.shields.io/badge/version-0.1.1-yellow)
 
 Watch your language young pal!
 
