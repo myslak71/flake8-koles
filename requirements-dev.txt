@@ -1,18 +1,16 @@
 # Linters
 ########################
 flake8==3.7.8
-flake8-docstrings==1.3.0
+flake8-docstrings==1.3.1
 flake8-print==3.1.0
+flake8-isort==2.7.0
 mypy==0.711
 yamllint==1.16.0
-# flake8 dependency, can be removed after https://gitlab.com/pycqa/flake8-docstrings/issues/36 is resolved
-pydocstyle==3.0.0
 
 # Testing purposes
 ########################
 pytest==5.0.1
 pytest-cov==2.7.1
-# To be used when the repo goes public
 coveralls==1.8.1
 
 # Debugging

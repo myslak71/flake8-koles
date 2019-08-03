@@ -1,19 +1,25 @@
 """Koles package installation setup."""
 import os
 
+from pkg_resources import parse_requirements
 from setuptools import setup
 
 DIR_PATH = os.path.abspath(os.path.dirname(__file__))
 
-install_requires = ['flake8>=1.5', 'six', 'pycodestyle']
+install_requires = ['flake8>=1.5']
+
+with open(os.path.join(DIR_PATH, 'requirements-dev.txt'), encoding='utf-8') as file:
+    requirements_dev = [str(req) for req in parse_requirements(file.read())]
+extras_require = {'dev': requirements_dev}
 
 with open(os.path.join(DIR_PATH, 'README.md'), encoding='utf-8') as file:
     long_description = file.read()
 
 about = {}
-
-with open(os.path.join(DIR_PATH, 'flake8_koles', '__about__.py'), 'r', encoding='utf-8') as f:
-    exec(f.read(), about)
+with open(
+        os.path.join(DIR_PATH, 'flake8_koles', '__about__.py'),
+        'r', encoding='utf-8') as file:
+    exec(file.read(), about)
 
 setup(
     name=about['__title__'],
@@ -36,6 +42,7 @@ setup(
             'KOL = flake8_koles.checker:KolesChecker',
         ]
     },
+    extras_require=extras_require,
 
     classifiers=[
         'Development Status :: 3 - Alpha',

@@ -3,7 +3,7 @@ import ast
 import optparse
 import os
 import re
-from typing import Generator, List, Tuple, Set
+from typing import Generator, List, Set, Tuple
 
 import pkg_resources
 from flake8.options.manager import OptionManager
@@ -32,7 +32,10 @@ class KolesChecker:
 
         regex = re.compile(f'(?=({self._pattern}))', flags=re.IGNORECASE)
 
-        return [(match.start(), match.group(1)) for match in regex.finditer(string)]
+        return [
+            (match.start(), match.group(1))
+            for match in regex.finditer(string)
+        ]
 
     def _get_bad_words(self) -> Set[str]:
         """Get a set of bad words."""
@@ -71,14 +74,19 @@ class KolesChecker:
     def _get_filename_errors(self) -> Generator[Tuple[int, int, str, type], None, None]:
         """Get filename errors if exist."""
         filename_errors = self._check_row(os.path.basename(self.filename))
-        if filename_errors:
-            for column, word in filename_errors:
-                yield (
-                    0,
-                    column,
-                    f'KOL002 Filename contains bad language: {self._censor_word(word)}',
-                    KolesChecker,
-                )
+
+        if not filename_errors:
+            return
+
+        yield from (
+            (
+                0,
+                column,
+                f'KOL002 Filename contains bad language: {self._censor_word(word)}',
+                KolesChecker,
+            )
+            for column, word in filename_errors
+        )
 
     def run(self) -> Generator[Tuple[int, int, str, type], None, None]:
         """Run the linter and return a generator of errors."""
@@ -92,13 +100,15 @@ class KolesChecker:
         """Get file content errors if exist."""
         for row_number, row in enumerate(content, 1):
             errors = self._check_row(row)
-            for column, word in errors:
-                yield (
+            yield from (
+                (
                     row_number,
                     column,
                     f'KOL001 Bad language found: {self._censor_word(word)}',
                     KolesChecker,
                 )
+                for column, word in errors
+            )
 
     @classmethod
     def add_options(cls, parser: OptionManager) -> None:

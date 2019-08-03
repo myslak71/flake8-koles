@@ -3,7 +3,7 @@ from unittest import mock
 from unittest.mock import Mock
 
 import pytest
-from flake8.options.manager import OptionManager, Option
+from flake8.options.manager import Option, OptionManager
 
 from flake8_koles.checker import KolesChecker
 
