@@ -7,9 +7,8 @@ cache: pip
 install:
   - pip install -r requirements-dev.txt
 script:
-  - make flake8
-  - make mypy
-  - make yamllint
+  - make safety
+  - make lint
   - pip install .
   - make unittests
 after_success: coveralls

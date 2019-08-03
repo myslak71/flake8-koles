@@ -2,6 +2,7 @@
 from unittest.mock import patch
 
 import pytest
+
 from flake8_koles.checker import KolesChecker
 
 
