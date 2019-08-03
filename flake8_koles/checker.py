@@ -17,8 +17,8 @@ class KolesChecker:
     """Bad language checker class."""
 
     name = 'flake8-koles'
-    options = None
-    swear_list_dir = '/data/swear_list'
+    options = optparse.Values()
+    SWEAR_DATA_DIR = '/data/swear_list'
     version = __version__
 
     def __init__(self, tree: ast.Module, filename: str) -> None:
@@ -78,14 +78,14 @@ class KolesChecker:
         return {
             word
             for word in data.decode().strip().split('\n')
-            if len(word) > self.options.ignore_shorties  # type: ignore
+            if len(word) > self.options.ignore_shorties
         }
 
     def _get_swears_data(self) -> bytes:
         """Get swears data from languages present in the options."""
         data = b''
-        for lang in self.options.lang:  # type: ignore
-            file_path = f'{self.swear_list_dir}/{lang}.dat'
+        for lang in self.options.lang:
+            file_path = f'{self.SWEAR_DATA_DIR}/{lang}.dat'
             data += pkg_resources.resource_string(
                 __name__, file_path
             )
@@ -101,7 +101,7 @@ class KolesChecker:
 
     def _censor_word(self, word: str) -> str:
         """Replace all letters but first with `*` if censor_msg option is True."""
-        if self.options.censor_msg:  # type: ignore
+        if self.options.censor_msg:
             return word[0] + '*' * (len(word) - 1)
         return word
 
