@@ -8,6 +8,62 @@ from flake8.options.manager import Option, OptionManager
 from flake8_koles.checker import KolesChecker
 
 
+@mock.patch('flake8_koles.checker.readlines')
+@mock.patch('flake8_koles.checker.KolesChecker._get_bad_words')
+def test_run(
+        mock_get_bad_words,
+        mock_readlines
+):
+    """Test that flake interface returns appropriate error messages."""
+    mock_get_bad_words.return_value = ['very', 'bad', 'words']
+    mock_readlines.return_value = ['Test very', 'nice', 'and bad words']
+    koles_checker = KolesChecker(tree='test_tree', filename='test_filename')
+    koles_checker.options = Mock(censor_msg=True)
+    result = [*koles_checker.run()]
+
+    assert result == [
+        (1, 5, 'KOL001 Bad language found: v***', KolesChecker),
+        (3, 4, 'KOL001 Bad language found: b**', KolesChecker),
+        (3, 8, 'KOL001 Bad language found: w****', KolesChecker)]
+
+
+def test_add_options(koles_checker):
+    """Test that all options are added to the parser."""
+    option_manager = OptionManager()
+    koles_checker.add_options(option_manager)
+
+    assert repr(option_manager.options) == repr(
+        [
+            Option(
+                long_option_name='--ignore-shorties',
+                default=0,
+                type='int',
+                parse_from_config=True
+            ),
+            Option(
+                long_option_name='--censor-msg',
+                default=0,
+                parse_from_config=True,
+                action='store_true'
+            ),
+            Option(
+                long_option_name='--lang',
+                default='english',
+                parse_from_config=True,
+                comma_separated_list=True
+            )
+        ]
+    )
+
+
+def test_parse_options(koles_checker):
+    """Test that options are correctly assigned to the class."""
+    test_options = {'kick_it': True}
+    koles_checker.parse_options(test_options)
+
+    assert koles_checker.options == test_options
+
+
 @pytest.mark.parametrize(
     "ignore_shorties, expected_result, get_swears_data_value",
     (
@@ -59,7 +115,7 @@ def test_get_bad_words(
     ),
 )
 @mock.patch('flake8_koles.checker.pkg_resources.resource_string')
-def test_get_swear_data(
+def test_get_swears_data(
         mock_resource_string,
         lang,
         resource_string_value,
@@ -72,64 +128,6 @@ def test_get_swear_data(
     mock_resource_string.side_effect = resource_string_value
     koles_checker.options = Mock(lang=lang)
     result = koles_checker._get_swears_data()
-
-    assert result == expected_result
-
-
-@pytest.mark.parametrize(
-    'pattern, string, expected_result',
-    (
-            # Case 1: Multiple overlapping patterns
-            ('abcd|ab|abc|cd', 'abcdab', [(0, 'abcd'), (2, 'cd'), (4, 'ab')]),
-            # Case 2: Single non-overlapping pattern
-            ('ab', 'abcdab', [(0, 'ab'), (4, 'ab')]),
-            # Case 3: Empty string
-            ('(?=(ab))', '', []),
-            # Case 4: Empty pattern
-            ('', 'abcdab', []),
-            # Case 6: Empty string and pattern
-            ('', '', []),
-            # Case 7: Uppercase string
-            ('abcd|ab|abc|cd', 'ABCDAB', [(0, 'ABCD'), (2, 'CD'), (4, 'AB')]),
-    ),
-)
-def test_check_row(
-        pattern,
-        string,
-        expected_result,
-        koles_checker
-):
-    """Test that check_string returns appropriate value for given pattern and string."""
-    koles_checker._pattern = pattern
-    result = koles_checker._check_row(string)
-
-    assert [*result] == expected_result
-
-
-@pytest.mark.parametrize(
-    'word, censor_msg, expected_result',
-    (
-            ('Mike D', True, 'M*****'),
-            ('Mike D', False, 'Mike D'),
-            ('MCA', True, 'M**'),
-            ('MCA', False, 'MCA'),
-            ('Ad-Rock', True, 'A******'),
-            ('Ad-Rock', False, 'Ad-Rock'),
-    ),
-)
-def test_censor_word(
-        word,
-        censor_msg,
-        expected_result,
-        koles_checker
-):
-    """Test censor_word.
-
-    Test that the function returns proper set of bad words
-    depending on ignore-shorties option.
-    """
-    koles_checker.options = Mock(censor_msg=censor_msg)
-    result = koles_checker._censor_word(word)
 
     assert result == expected_result
 
@@ -261,56 +259,80 @@ def test_get_content_errors(
     assert result == expected_result
 
 
-@mock.patch('flake8_koles.checker.readlines')
-@mock.patch('flake8_koles.checker.KolesChecker._get_bad_words')
-def test_run(
-        mock_get_bad_words,
-        mock_readlines
+@pytest.mark.parametrize(
+    'pattern, string, expected_result',
+    (
+            # Case 1: Multiple overlapping patterns
+            ('abcd|ab|abc|cd', 'abcdab', [(0, 'abcd'), (2, 'cd'), (4, 'ab')]),
+            # Case 2: Single non-overlapping pattern
+            ('ab', 'abcdab', [(0, 'ab'), (4, 'ab')]),
+            # Case 3: Empty string
+            ('(?=(ab))', '', []),
+            # Case 4: Empty pattern
+            ('', 'abcdab', []),
+            # Case 6: Empty string and pattern
+            ('', '', []),
+            # Case 7: Uppercase string
+            ('abcd|ab|abc|cd', 'ABCDAB', [(0, 'ABCD'), (2, 'CD'), (4, 'AB')]),
+    ),
+)
+def test_check_row(
+        pattern,
+        string,
+        expected_result,
+        koles_checker
 ):
-    """Test that flake interface returns appropriate error messages."""
-    mock_get_bad_words.return_value = ['very', 'bad', 'words']
-    mock_readlines.return_value = ['Test very', 'nice', 'and bad words']
-    koles_checker = KolesChecker(tree='test_tree', filename='test_filename')
-    koles_checker.options = Mock(censor_msg=True)
-    result = [*koles_checker.run()]
-    assert result == [
-        (1, 5, 'KOL001 Bad language found: v***', KolesChecker),
-        (3, 4, 'KOL001 Bad language found: b**', KolesChecker),
-        (3, 8, 'KOL001 Bad language found: w****', KolesChecker)]
+    """Test that check_string returns appropriate value for given pattern and string."""
+    koles_checker._pattern = pattern
+    result = koles_checker._check_row(string)
+
+    assert [*result] == expected_result
 
 
-def test_add_options(koles_checker):
-    """Test that all options are added to the parser."""
-    option_manager = OptionManager()
-    koles_checker.add_options(option_manager)
+@pytest.mark.parametrize(
+    'word, censor_msg, expected_result',
+    (
+            ('Mike D', True, 'M*****'),
+            ('Mike D', False, 'Mike D'),
+            ('MCA', True, 'M**'),
+            ('MCA', False, 'MCA'),
+            ('Ad-Rock', True, 'A******'),
+            ('Ad-Rock', False, 'Ad-Rock'),
+    ),
+)
+def test_censor_word(
+        word,
+        censor_msg,
+        expected_result,
+        koles_checker
+):
+    """Test censor_word.
 
-    assert repr(option_manager.options) == repr(
-        [
-            Option(
-                long_option_name='--ignore-shorties',
-                default=0,
-                type='int',
-                parse_from_config=True
-            ),
-            Option(
-                long_option_name='--censor-msg',
-                default=0,
-                parse_from_config=True,
-                action='store_true'
-            ),
-            Option(
-                long_option_name='--lang',
-                default='english',
-                parse_from_config=True,
-                comma_separated_list=True
-            )
-        ]
-    )
+    Test that the function returns proper set of bad words
+    depending on ignore-shorties option.
+    """
+    koles_checker.options = Mock(censor_msg=censor_msg)
+    result = koles_checker._censor_word(word)
+
+    assert result == expected_result
 
 
-def test_parse_options(koles_checker):
-    """Test that options are correctly assigned to the class."""
-    test_options = {'kick_it': True}
-    koles_checker.parse_options(test_options)
+@pytest.mark.parametrize(
+    'listdir_value, expected_result',
+    (
+            # Case: empty language dir
+            ([], []),
+            (['english.dat'], ['english']),
+            (['english.dat', 'polish.dat'], ['english', 'polish']),
+    ),
+)
+@mock.patch('flake8_koles.checker.pkg_resources.resource_listdir')
+def test_get_lang_choices(
+        listdir_mock,
+        listdir_value,
+        expected_result,
+        koles_checker):
+    """Test that proper language names are fetched from the resources."""
+    listdir_mock.return_value = listdir_value
 
-    assert koles_checker.options == test_options
+    assert koles_checker._get_lang_choices() == expected_result
