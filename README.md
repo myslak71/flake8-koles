@@ -5,7 +5,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/flake8-koles)
 ![image](https://img.shields.io/badge/version-0.1.2-yellow)
 ![Requires.io](https://img.shields.io/requires/github/myslak71/flake8-koles)
-![GitHub](https://img.shields.io/github/license/myslak71/flake8-koles)
+![GitHub](https://img.shields.io/github/license/myslak71/flake8-koles?color=46c28e)
 
 Watch your language young pal!
 

@@ -48,13 +48,12 @@ class KolesChecker:
             action='store_true'
         )
 
-        lang_choices = cls._get_lang_choices()
         parser.add_option(
             '--lang',
             default='english',
             parse_from_config=True,
             comma_separated_list=True,
-            choices=lang_choices
+            choices=cls._get_lang_choices()
         )
 
     @classmethod

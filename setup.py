@@ -13,8 +13,8 @@ with open(os.path.join(DIR_PATH, 'README.md'), encoding='utf-8') as file:
 
 about = {}
 with open(
-        os.path.join(DIR_PATH, 'flake8_koles', '__about__.py'),
-        'r', encoding='utf-8') as file:
+    os.path.join(DIR_PATH, 'flake8_koles', '__about__.py'), 'r', encoding='utf-8'
+) as file:
     exec(file.read(), about)
 
 with open(os.path.join(DIR_PATH, 'requirements-dev.txt'), encoding='utf-8') as file:
@@ -37,12 +37,7 @@ setup(
     python_requires=">=3.6",
     install_requires=install_requires,
     extras_require={'dev': requirements_dev},
-    entry_points={
-        'flake8.extension': [
-            'KOL = flake8_koles.checker:KolesChecker',
-        ]
-    },
-
+    entry_points={'flake8.extension': ['KOL = flake8_koles.checker:KolesChecker']},
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
