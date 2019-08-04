@@ -17,6 +17,9 @@ with open(
         'r', encoding='utf-8') as file:
     exec(file.read(), about)
 
+with open(os.path.join(DIR_PATH, 'requirements-dev.txt'), encoding='utf-8') as file:
+    requirements_dev = [str(req) for req in parse_requirements(file.read())]
+
 setup(
     name=about['__title__'],
     description=about['__description__'],
@@ -31,8 +34,9 @@ setup(
     packages=['flake8_koles'],
     package_data={'flake8_koles': ['data/swear_list/*.dat']},
     py_modules=['flake8_koles'],
-    python_requires=">=3.7",
+    python_requires=">=3.6",
     install_requires=install_requires,
+    extras_require={'dev': requirements_dev},
     entry_points={
         'flake8.extension': [
             'KOL = flake8_koles.checker:KolesChecker',
@@ -45,6 +49,7 @@ setup(
         'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
 )
