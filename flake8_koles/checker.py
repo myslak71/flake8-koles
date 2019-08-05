@@ -47,7 +47,6 @@ class KolesChecker:
             parse_from_config=True,
             action='store_true'
         )
-
         parser.add_option(
             '--lang',
             default='english',
@@ -90,7 +89,7 @@ class KolesChecker:
             return readlines(self.filename)
 
     def _get_filename_errors(self) -> Generator[Tuple[int, int, str, type], None, None]:
-        """Get filename errors if exist."""
+        """Get filename errors if any exist."""
         filename_errors = self._check_row(os.path.basename(self.filename))
 
         return (
