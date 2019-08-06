@@ -20,14 +20,15 @@ pip install flake8-koles
 
 ## Usage
 ```
-flake8 --ignore-shorties 4 --censor-msg --lang=english,polish
+flake8 --ignore-shorties 4 --censor-msg --lang=english,polish --ignore-swears=very,bad,words
 ```
 ##### Options
 |OPTION    | DEFAULT|DESCRIPTION |
 | --------  |---|-------------|
-|`--ignore-shorties`|0 |ignore bad words shorter or equal to the argument|
-|`--censor-msg`|False |replace bad words not leading letters with `*` in error messages|
-|`--lang`|english |use bad words from the selected languages|
+|`--censor-msg`|False |replace swears not leading letters with `*` in error messages|
+|`--ignore-shorties`|0 |ignore swears shorter or equal to the argument|
+|`--ignore-swears`| |explicitly pass swears to ignore|
+|`--lang`|english |use swears from the selected languages|
 
 ## Development notes
 
