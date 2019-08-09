@@ -3,7 +3,7 @@ coverage_html:  ## create html coverage report and open it in the default browse
 	xdg-open htmlcov/index.html
 
 flake8:  ## run flake8
-	flake8 flake8_koles/
+	flake8 flake8_koles/ --ignore=KOL001,KOL002
 
 lint: mypy flake8 yamllint  # run all linters
 

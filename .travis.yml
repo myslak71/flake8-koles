@@ -1,14 +1,18 @@
 ---
 language: python
+python:
+  - "3.6"
+  - "3.7"
 sudo: required
 dist: xenial
-python: "3.7"
 cache: pip
 install:
-  - pip install -r requirements-dev.txt
+  - pip install .[dev]
+env:
+  global:
+    - MAKEFLAGS="-j 2"
 script:
   - make safety
   - make lint
-  - pip install .
   - make unittests
 after_success: coveralls

@@ -2,8 +2,10 @@
 
 [![Build Status](https://travis-ci.org/myslak71/flake8-koles.svg?branch=master)](https://travis-ci.org/myslak71/flake8-koles)
 [![Coverage Status](https://coveralls.io/repos/github/myslak71/flake8-koles/badge.svg?branch=master)](https://coveralls.io/github/myslak71/flake8-koles?branch=master)
-![image](https://img.shields.io/badge/python-3.7-blue.svg)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/flake8-koles)
 ![image](https://img.shields.io/badge/version-0.1.2-yellow)
+![Requires.io](https://img.shields.io/requires/github/myslak71/flake8-koles)
+![GitHub](https://img.shields.io/github/license/myslak71/flake8-koles?color=46c28e)
 
 Watch your language young pal!
 
@@ -18,14 +20,17 @@ pip install flake8-koles
 
 ## Usage
 ```
-flake8 --ignore-shorties 4 --censor-msg --lang=english,polish
+flake8 --ignore-shorties 4 --censor-msg --lang=english,polish --ignore-swears=very,bad,words
 ```
 ##### Options
 |OPTION    | DEFAULT|DESCRIPTION |
 | --------  |---|-------------|
-|`--ignore-shorties`|0 |ignore bad words shorter or equal to the argument|
-|`--censor-msg`|False |replace bad words not leading letters with `*` in error messages|
-|`--lang`|english |use bad words from the selected languages|
+|`--censor-msg`|False |replace swears not leading letters with `*` in error messages|
+|`--ignore-shorties`|0 |ignore swears shorter or equal to the argument|
+|`--ignore-swears`| |explicitly pass swears to ignore|
+|`--lang`|english |use swears from the selected languages|
+
+Above options may be specified in `setup.cfg` file as well.
 
 ## Development notes
 
