@@ -30,6 +30,8 @@ flake8 --ignore-shorties 4 --censor-msg --lang=english,polish --ignore-swears=ve
 |`--ignore-swears`| |explicitly pass swears to ignore|
 |`--lang`|english |use swears from the selected languages|
 
+Above options may be specified in `setup.cfg` file as well.
+
 ## Development notes
 
 ##### Makefile commands
