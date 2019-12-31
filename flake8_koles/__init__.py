@@ -9,5 +9,5 @@ from flake8_koles.__about__ import (  # noqa
     __license__,
     __title__,
     __url__,
-    __version__
+    __version__,
 )
