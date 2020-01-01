@@ -3,9 +3,8 @@
 [![Build Status](https://travis-ci.org/myslak71/flake8-koles.svg?branch=master)](https://travis-ci.org/myslak71/flake8-koles)
 [![Coverage Status](https://coveralls.io/repos/github/myslak71/flake8-koles/badge.svg?branch=master)](https://coveralls.io/github/myslak71/flake8-koles?branch=master)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/flake8-koles)
-![image](https://img.shields.io/badge/version-0.2.1-yellow)
-![Requires.io](https://img.shields.io/requires/github/myslak71/flake8-koles)
-![GitHub](https://img.shields.io/github/license/myslak71/flake8-koles?color=46c28e)
+![PyPI](https://img.shields.io/pypi/v/flake8-koles)
+[![Requirements Status](https://requires.io/github/myslak71/flake8-koles/requirements.svg?branch=master)](https://requires.io/github/myslak71/flake8-koles/requirements/?branch=master)![GitHub](https://img.shields.io/github/license/myslak71/flake8-koles?color=46c28e)
 
 Watch your language young pal!
 
