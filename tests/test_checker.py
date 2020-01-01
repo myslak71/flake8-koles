@@ -1,4 +1,5 @@
 """KolesChecker test module."""
+import re
 from unittest import mock
 from unittest.mock import Mock
 
@@ -228,12 +229,21 @@ def test_get_content_errors(
     koles_checker,
 ):
     """Test that appropriate error messages are returned."""
+    koles_checker._pattern = 'not empty pattern'
     mock_check_row.side_effect = check_row_value
     mock_censor_word.side_effect = censor_word_value
     result = [*koles_checker._get_content_errors(content)]
 
     assert result == expected_result
 
+def test_get_content_errors_empty_pattern(
+    koles_checker,
+):
+    """Test that no error messages are returned for empty pattern."""
+    koles_checker._pattern = ''
+    result = [*koles_checker._get_content_errors(['nice_content'])]
+
+    assert result == []
 
 @pytest.mark.parametrize(
     'pattern, string, expected_result',
@@ -244,17 +254,13 @@ def test_get_content_errors(
         ('ab', 'abcdab', [(0, 'ab'), (4, 'ab')]),
         # Case 3: Empty string
         ('(?=(ab))', '', []),
-        # Case 4: Empty pattern
-        ('', 'abcdab', []),
-        # Case 6: Empty string and pattern
-        ('', '', []),
-        # Case 7: Uppercase string
+        # Case 4: Uppercase string
         ('abcd|ab|abc|cd', 'ABCDAB', [(0, 'ABCD'), (2, 'CD'), (4, 'AB')]),
     ),
 )
 def test_check_row(pattern, string, expected_result, koles_checker):
     """Test that check_string returns appropriate value for given pattern and string."""
-    koles_checker._pattern = pattern
+    koles_checker._regex = re.compile(f'(?=({pattern}))', flags=re.IGNORECASE)
     result = koles_checker._check_row(string)
 
     assert [*result] == expected_result

@@ -6,11 +6,11 @@ import re
 from itertools import chain, permutations
 from typing import Generator, List, Tuple
 
-import pkg_resources
 from flake8.options.manager import OptionManager
 from flake8.utils import stdin_get_value
 from pycodestyle import readlines
 
+import pkg_resources
 from flake8_koles import __version__
 
 
@@ -26,12 +26,12 @@ class KolesChecker:
         """Initialize class values. Parameter `tree` is required by flake8."""
         self.filename = filename
         self._pattern = self._get_pattern()
+        self._regex = re.compile(f'(?=({self._pattern}))', flags=re.IGNORECASE)
 
     def run(self) -> Generator[Tuple[int, int, str, type], None, None]:
         """Run the linter and return a generator of errors."""
-        content = self._get_file_content()
         yield from self._get_filename_errors()
-        yield from self._get_content_errors(content)
+        yield from self._get_content_errors(self._get_file_content())
 
     @classmethod
     def add_options(cls, parser: OptionManager) -> None:
@@ -69,11 +69,13 @@ class KolesChecker:
             for word in data.decode().strip().split('\n')
             if not self._is_swear_ignored(word)
         }
+
         return '|'.join(swear_set)
 
     def _get_swears_data(self) -> bytes:
         """Get swears data from languages present in the options."""
         data = b''
+
         for lang in self.options.lang:
             file_path = f'{self.SWEAR_DATA_DIR}/{lang}.dat'
             data += pkg_resources.resource_string(__name__, file_path)
@@ -109,9 +111,13 @@ class KolesChecker:
         )
 
     def _get_content_errors(
-            self, content
+        self, content
     ) -> Generator[Tuple[int, int, str, type], None, None]:
         """Get file content errors if any exist."""
+        if self._pattern == '':
+            yield from ()
+            return
+
         for row_number, row in enumerate(content, 1):
             errors = self._check_row(row)
             yield from (
@@ -124,14 +130,11 @@ class KolesChecker:
                 for column, word in errors
             )
 
-    def _check_row(self, string: str) -> List[Tuple[int, str]]:
+    def _check_row(self, string: str) -> Generator[Tuple[int, str], None, None]:
         """Return a list containing bad words and their positions."""
-        if self._pattern == '':
-            return []
-
-        regex = re.compile(f'(?=({self._pattern}))', flags=re.IGNORECASE)
-
-        return [(match.start(), match.group(1)) for match in regex.finditer(string)]
+        yield from (
+            (match.start(), match.group(1)) for match in self._regex.finditer(string)
+        )
 
     def _censor_word(self, word: str) -> str:
         """Replace all letters but first with `*` if censor_msg option is True."""
